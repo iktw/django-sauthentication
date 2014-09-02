@@ -6,7 +6,7 @@ Simple **session authentication** for e.g. webb applications.
 * Copy **sauthentication.py** to the folder where **settings.py** is located.
 * Open root *urls.py* and add the following line:
 ```
-url(r'sauth/', 'myproject.sauthentication.auth', name='auth'),
+url(r'^sauth/', 'myproject.sauthentication.auth', name='auth'),
 ```
 *Change < myproject > to your folder name.*
 
