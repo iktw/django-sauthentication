@@ -1,5 +1,8 @@
+from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import HttpResponse
+from django.core import serializers
+
 import json
 
 
@@ -29,19 +32,26 @@ def auth(request):
                     if user.is_active:
                         # ...we login and return a json response
                         login(request, user)
-                        return json_response('success', True, 200)
+                        obj = User.objects.get(pk=user.id)
+                        serialized_obj = serializers.serialize('json', [obj, ])
+
+                        return HttpResponse(
+                            serialized_obj,
+                            content_type='application/javascript; charset=utf8',
+                            status=200
+                        )
                     # But if the user is inactive we return a bad json response
                     else:
-                        return json_response('failed', 'The account you are trying to access is disabled.', status=400)
+                        return json_response('message', 'The account you are trying to access is disabled.', status=400)
                 # If the user credentials doesnt match we send out a bad json response
                 else:
-                    return json_response('failed', 'Could not match given username and password.', status=400)
+                    return json_response('message', 'Could not match given username and password.', status=400)
             else:
                 # If the some credentials was missed, we send out a bad json response
-                return json_response('failed', 'Both the username and password must be provided.', status=400)
+                return json_response('message', 'Both the username and password must be provided.', status=400)
         # If user is already authenticated, we also send out a bad json response
         else:
-            return json_response('failed', 'Already authenticated.', status=400)
+            return json_response('message', 'Already authenticated.', status=400)
     # If the we receive a GET ?logout=True
     elif request.GET.get('logout') == "True":
         # ... and the user is authenticated, we logout.
@@ -50,6 +60,20 @@ def auth(request):
             return json_response('success', 'Signed out authenticated user.', status=200)
         # otherwise we return a bad json_response
         else:
-            return json_response('failed', 'No user is logged on.', status=400)
+            return json_response('message', 'No user is logged on.', status=400)
+    elif request.GET.get('get') == "User":
+        if request.user.is_authenticated():
+            obj = User.objects.get(pk=request.user.pk)
+            fields = ['pk', 'username', 'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'last_login', 'groups', 'user_permissions']
+            arr = serializers.serialize('json', [obj, ], fields=fields)
+            serialized_obj = arr[1:-1]
+
+            return HttpResponse(
+                serialized_obj,
+                content_type='application/javascript; charset=utf8',
+                status=200
+            )
+        else:
+            return json_response('message', 'No user is logged on.', status=400)
     else:
-        return json_response('failed', 'Allowed methods: POST and GET=?logout=True', status=405)
+        return json_response('message', 'Allowed methods: POST and GET=?logout=True', status=405)
