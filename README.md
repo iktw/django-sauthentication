@@ -11,7 +11,10 @@ url(r'^sauth/', 'myproject.sauthentication.auth', name='auth'),
 *Change < myproject > to your folder name.*
 
 ## Usage
-Allowed methods are: POST and GET=?logout=True *(localhost:8000/sauth/?logout=True)*
+Allowed methods are:
+- POST > {'username':'admin', 'password': 'ilovesauth'}
+- GET > ?logout=True *(localhost:8000/sauth/?logout=True)*
+- GET > ?get=User *(localhost:8000/sauth/?get=User)*
 
 ### E.g. of usage with angularjs to authenticate user:
 ```
